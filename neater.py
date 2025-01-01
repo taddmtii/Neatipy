@@ -117,7 +117,6 @@ if __name__ == "__main__":
 
         elif choice == "3":
             clear_downloads()
-            print("Downloads successfully cleared!")
 
         else:
             print("Invalid choice. Please try again.")
