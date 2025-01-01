@@ -14,10 +14,11 @@ def get_download_files():
     return downloads_files
 
 def filter_desktop_files():
-    """ Obtains and filters all desktop files.
+    """ Obtains and filters all desktop files into three seperate categories:
+        Shortcuts, Directories, and Files.
 
     Returns:
-        List[List[string]]: desktop_files that gives all files filtered and , [0] = desktop_pointers, [1] = desktop_directories, [2] = desktop_files
+        List[List[string]]: desktop_files, [0] = desktop_pointers, [1] = desktop_directories, [2] = desktop_files
     """
     desktop_pointers = []
     desktop_directories = []
@@ -44,44 +45,85 @@ def filter_desktop_files():
 
 if __name__ == "__main__":
 
-    print("How can I help?")
-    print("1. Clean Desktop Files")
-    print("2. Display Downloads Folder")
-    print("3. Clear Download Files") 
+    while (True):
+        print("How can I help? (type e to exit Neatipy)")
+        print("1. Organize Desktop Files and Folders")
+        print("2. Display Downloads Folder")
+        print("3. Clear Download Files")
+        print("4. Clear Desktop Files")
 
-    choice = input()
-    choice = int(choice)
-    
-    if choice == 1:
-        try:
-            desktop_files = filter_desktop_files()
-        except:
-            print("An error has occured and an exception was thrown.")
-        else:
-            print(desktop_files)
-    elif choice == 2:
-        download_files = get_download_files()
-        print("Files and Directories in Downloads:")
-        for file in download_files:
-            print(file)
-    elif choice == 3:
-        download_files = get_download_files()
-        if download_files == []:
-            print("Nothing to delete, you're all cleaned up!")
-        for file in download_files:
-            path = os.path.join(r"C:\Users\taddt\Downloads", file)
-            if os.path.exists(path):
+        choice = input()
+        if choice == "e":
+            break
+        
+        choice = int(choice)
+        
+        if choice == 1:
+            warning = input("Warning: this is a destrutive action. Would you like to proceed?: (y or n)")
+            if warning == 'y':    
                 try:
-                    if os.path.isdir(path):
-                        shutil.rmtree(path)
-                        print("Directory " + file + " was successfully deleted.")
-                        continue
-                    os.remove(path)
+                    desktop_files = filter_desktop_files()
                 except:
-                    print()
-                    print(f"Exception was thrown on file {file}, moving onto next file.")
+                    print("An error has occured when fetching and filtering desktop files and an exception was thrown.")
                 else:
-                    print("File " + file + " was successfully deleted.")
+                    desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+                    directory_path_shortcuts = os.path.join(desktop_path, "Shortcuts")
+                    if not os.path.exists(directory_path_shortcuts):
+                        os.mkdir(directory_path_shortcuts)
+                    else:
+                        shutil.rmtree(directory_path_shortcuts)
+                        os.mkdir(directory_path_shortcuts)
+                        
+                    directory_path_directories = os.path.join(desktop_path, "Directories")
+                    if not os.path.exists(directory_path_directories):
+                        os.mkdir(directory_path_directories)
+                    else:
+                        shutil.rmtree(directory_path_directories)
+                        os.mkdir(directory_path_directories)
+                        
+                    directory_path_files = os.path.join(desktop_path, "Files")
+                    if not os.path.exists(directory_path_files):
+                        os.mkdir(directory_path_files)
+                    else:
+                        shutil.rmtree(directory_path_files)
+                        os.mkdir(directory_path_files)
+                # Add Files to each Directory
+                for shortcut in desktop_files[0]: #shortcuts
+                    path = f"{desktop_path}\{shortcut[0]}{shortcut[1]}"
+                    shutil.copy(path, directory_path_shortcuts) #shortcuts / pointers go to shortcuts folder
+                for directory in desktop_files[1]:
+                    path = f"{desktop_path}\{directory}"
+                    directory_path = directory_path_directories + r"\\" + directory
+                    shutil.copytree(path, directory_path) #shortcuts / pointers go to shortcuts folder
+                 
+            elif warning == 'n':
+                print("Operation Cancelled")
+                continue
+            else:
+                print("Invalid input... back to main menu")
+        elif choice == 2:
+            download_files = get_download_files()
+            print("Files and Directories in Downloads:")
+            for file in download_files:
+                print(file)
+        elif choice == 3:
+            download_files = get_download_files()
+            if download_files == []:
+                print("Nothing to delete, you're all cleaned up!")
+            for file in download_files:
+                path = os.path.join(r"C:\Users\taddt\Downloads", file)
+                if os.path.exists(path):
+                    try:
+                        if os.path.isdir(path):
+                            shutil.rmtree(path)
+                            print("Directory " + file + " was successfully deleted.")
+                            continue
+                        os.remove(path)
+                    except:
+                        print()
+                        print(f"Exception was thrown on file {file}, moving onto next file.")
+                    else:
+                        print("File " + file + " was successfully deleted.")
 
-    #for num, file in list(enumerate(download_files)):
-        #print(str(num + 1) + ": " + file)
+        #for num, file in list(enumerate(download_files)):
+            #print(str(num + 1) + ": " + file)
